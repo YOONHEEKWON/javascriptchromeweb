@@ -3,29 +3,35 @@
   const newBookMarkForm = document.getElementById("bookmark-item-input-form");
   const bookmarkItemList = document.getElementById("bookmark-list");
 
+  // 로컬 스토리지에서 bookmarkList 불러오기
   let bookmarkList = [];
   if (localStorage.getItem("bookmarkList")) {
-    bookmarkList = JSON.parse(localStorage.getItem("bookmarkList"));
+    try {
+      bookmarkList = JSON.parse(localStorage.getItem("bookmarkList"));
+    } catch (e) {
+      console.error("JSON parsing error:", e);
+      bookmarkList = []; // 파싱 오류 시 빈 배열로 초기화
+    }
   } else {
     localStorage.setItem("bookmarkList", JSON.stringify(bookmarkList));
   }
 
   const addBookMarkItem = () => {
-    let bookmarkList = [];
-    if (localStorage.getItem("bookmarkList")) {
-      bookmarkList = localStorage.getItem("bookmarkList");
-    }
+    console.log(bookmarkList);
     let name = document.getElementById("new-bookmark-name-input").value;
     let url = document.getElementById("new-bookmark-url-input").value;
     let createAt = Date.now();
     console.log(name, url, createAt);
+
     bookmarkList.push({
       name: name,
       url: url,
       createAt: createAt,
     });
-    localStorage.setItem("bookmarkList", bookmarkList);
-    document.getElementById("new-bookmark-name-input").value;
+    localStorage.setItem("bookmarkList", JSON.stringify(bookmarkList));
+
+    // 입력 필드 초기화
+    document.getElementById("new-bookmark-name-input").value = "";
     document.getElementById("new-bookmark-url-input").value = "";
     setBookmarkItem({ name: name, url: url, createAt: createAt });
     newBookmarkToggle();
@@ -40,13 +46,13 @@
       ? (newBookMarkForm.style.display = "block")
       : (newBookMarkForm.style.display = "none");
   };
+
   const deleteBookmarkItem = (id) => {
     const isDelete = window.confirm("정말 삭제 하시겠습니까 ?");
     if (isDelete) {
-      let bookmarkList = JSON.parse(localStorage.getItem("bookmarkList"));
-      let nowBookmarkList = bookmarkList.filter((elm) => elm.createAt !== id);
-      localStorage.setItem("bookmarkList", JSON.stringify(nowBookmarkList));
-      document.getElementById(`bookmark-${id}`).remove();
+      bookmarkList = bookmarkList.filter((elm) => elm.createAt !== id);
+      localStorage.setItem("bookmarkList", JSON.stringify(bookmarkList));
+      document.getElementById(`bookmark-item-${id}`).remove();
     }
   };
 
@@ -87,8 +93,6 @@
     urlIcon.append(urlIconImg);
 
     bookmarkItemList.appendChild(bookmarkItem);
-
-    console.log(item);
   };
 
   const setBookmarkList = () => {
@@ -104,5 +108,6 @@
   document
     .getElementById("cancel-btn")
     .addEventListener("click", newBookmarkToggle);
+
   setBookmarkList();
 })();
